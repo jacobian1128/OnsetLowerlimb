@@ -48,6 +48,8 @@ private:
 public:
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg void OnDestroy();
+	afx_msg void OnBnClickedTrigger();
+	afx_msg void OnBnClickedReady();
 };
 
 #endif
