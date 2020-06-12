@@ -63,7 +63,7 @@ void taskDAQ::initDAQ()
 	char buff[2048] = { '\0' };
 
 	DAQmxCreateTask("", &taskHandle);
-	DAQmxCreateCIAngEncoderChan(taskHandle, "Dev2/ctr1", "", DAQmx_Val_X1, 0, 0.0, DAQmx_Val_ALowBLow, DAQmx_Val_Degrees, 4096, 0.0, "");
+	DAQmxCreateCIAngEncoderChan(taskHandle, "Dev1/ctr1", "", DAQmx_Val_X1, 0, 0.0, DAQmx_Val_ALowBLow, DAQmx_Val_Degrees, 4096, 0.0, "");
 
 
 }
