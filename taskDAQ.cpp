@@ -35,8 +35,8 @@ UINT taskDAQ::threadClock(LPVOID pParam)
 	while (_this->isExecute()) {
 		_this->timeCurrent = clock();
 
-		_this->readDAQ();
-		_this->writeDAQ();
+		//_this->readDAQ();
+		//_this->writeDAQ();
 
 		Sleep(1);
 
