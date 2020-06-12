@@ -36,13 +36,23 @@ public:
 	bool isExecute() { return bExecute; }
 
 public:
+	void setReady();
 	void setTrigger() { bTrigger = true; }
-	void setExecute() { bExecute = true; }
+	void setExecute() { bExecute = true; DAQmxStartTask(taskHandle); }
 	void dismissExecute() { bExecute = false; }
+
+public:
+	float64 getDegree() { return deg; }
 
 private:
 	TaskHandle taskHandle;
-	void initDAQ();
+
+	void initializeDAQ();
+	void dismissDAQ();
+	void readDAQ();
+	void writeDAQ();
+
+	float64 deg;
 };
 
 #endif

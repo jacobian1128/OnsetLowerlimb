@@ -9,8 +9,6 @@
 
 taskDAQ::taskDAQ() 
 {
-	pThreadClock = AfxBeginThread(threadClock, this);
-	hThreadClock = pThreadClock->m_hThread;
 }
 
 taskDAQ::~taskDAQ()
@@ -22,7 +20,7 @@ UINT taskDAQ::threadClock(LPVOID pParam)
 {
 	taskDAQ* _this = (taskDAQ*)pParam;
 
-	_this->initDAQ();
+	_this->initializeDAQ();
 
 	// wait before trigger
 	while (!_this->isTrigger()) {
@@ -36,12 +34,18 @@ UINT taskDAQ::threadClock(LPVOID pParam)
 	// executing
 	while (_this->isExecute()) {
 		_this->timeCurrent = clock();
+
+		_this->readDAQ();
+		_this->writeDAQ();
+
 		Sleep(1);
 
-		if (_this->getTime() > 10) {
+		if (_this->getTime() >= 10) {
 			_this->dismissExecute();
 		}
 	}
+
+	_this->dismissDAQ();
 
 	return 0;
 }
@@ -49,6 +53,7 @@ UINT taskDAQ::threadClock(LPVOID pParam)
 void taskDAQ::resetTime()
 {
 	timeStart = clock();
+	timeCurrent = timeStart;
 }
 
 double taskDAQ::getTime()
@@ -57,13 +62,33 @@ double taskDAQ::getTime()
 	return difftime(timeCurrent, timeStart) * 1e-3;
 }
 
-void taskDAQ::initDAQ()
+void taskDAQ::initializeDAQ()
 {
 	int error = 0;
 	char buff[2048] = { '\0' };
 
 	DAQmxCreateTask("", &taskHandle);
 	DAQmxCreateCIAngEncoderChan(taskHandle, "Dev2/ctr1", "", DAQmx_Val_X1, 0, 0.0, DAQmx_Val_ALowBLow, DAQmx_Val_Degrees, 4096, 0.0, "");
+}
 
+void taskDAQ::dismissDAQ()
+{
+	DAQmxStopTask(taskHandle);
+	DAQmxClearTask(taskHandle);
+}
+
+void taskDAQ::setReady()
+{
+	pThreadClock = AfxBeginThread(threadClock, this);
+	hThreadClock = pThreadClock->m_hThread;
+}
+
+void taskDAQ::readDAQ()
+{
+	DAQmxReadCounterScalarF64(taskHandle, 5.0, &deg, 0);
+}
+
+void taskDAQ::writeDAQ()
+{
 
 }
