@@ -7,20 +7,21 @@
 //
 //}
 
-taskDAQ::taskDAQ() 
+taskDAQ::taskDAQ() : position(0)
 {
+	fileDAQ.open("daq.csv", ios::out);
+	fileSensor.open("sensor.csv", ios::out);
 }
 
 taskDAQ::~taskDAQ()
 {
-
+	fileDAQ.close();
+	fileSensor.close();
 }
 
 UINT taskDAQ::threadClock(LPVOID pParam)
 {
 	taskDAQ* _this = (taskDAQ*)pParam;
-
-	_this->initializeDAQ();
 
 	// wait before trigger
 	while (!_this->isTrigger()) {
@@ -35,14 +36,57 @@ UINT taskDAQ::threadClock(LPVOID pParam)
 	while (_this->isExecute()) {
 		_this->timeCurrent = clock();
 
-		//_this->readDAQ();
-		//_this->writeDAQ();
-
 		Sleep(1);
 
 		if (_this->getTime() >= 10) {
 			_this->dismissExecute();
 		}
+	}
+
+	_this->dismissDAQ();
+
+	return 0;
+}
+
+UINT taskDAQ::threadSensor(LPVOID pParam)
+{
+	taskDAQ* _this = (taskDAQ*)pParam;
+
+	_this->Sensor.InitMATCH();
+	_this->Sensor.GetDataAddress();
+
+	// wait before trigger
+	while (!_this->isExecute()) {
+		Sleep(10);
+	}
+
+	// executing
+	while (_this->isExecute()) {
+		_this->Sensor.ReadSensorData();
+		_this->writeSensorData();
+	}
+
+	_this->Sensor.CloseMATCH();
+
+	return 0;
+}
+
+UINT taskDAQ::threadDAQ(LPVOID pParam)
+{
+	taskDAQ* _this = (taskDAQ*)pParam;
+
+	_this->initializeDAQ();
+
+	// wait before trigger
+	while (!_this->isExecute()) {
+		Sleep(10);
+	}
+
+	// executing
+	DAQmxStartTask(_this->taskHandle);
+	while (_this->isExecute()) {
+		_this->readDAQ();
+		_this->writeDAQ();
 	}
 
 	_this->dismissDAQ();
@@ -85,10 +129,48 @@ void taskDAQ::setReady()
 
 void taskDAQ::readDAQ()
 {
-	DAQmxReadCounterScalarF64(taskHandle, 5.0, &deg, 0);
+	DAQmxReadCounterScalarF64(taskHandle, 1.0, &position, 0);
 }
 
 void taskDAQ::writeDAQ()
 {
+	fileDAQ << getTime() << ',' << position << endl;
+}
 
+void taskDAQ::writeSensorData()
+{
+	float data[8 * 3];
+
+	Sensor.GetEMG(data);
+
+	fileSensor << getTime() << ',';
+	for (int i = 0; i < SEN_NUM; i++) {
+		fileSensor << data[3 * i] << ',';
+		stackEMG[i].push_back(data[3 * i]);
+		if (stackEMG[i].size() > stackSize) {
+			stackEMG[i].erase(stackEMG[i].begin());
+		}
+	}
+
+	Sensor.GetAcc(data);
+	for (int i = 0; i < SEN_NUM; i++) {
+		fileSensor << data[3 * i] << ',';
+		fileSensor << data[3 * i + 1] << ',';
+		fileSensor << data[3 * i + 2] << ',';
+	}
+
+	Sensor.GetGyro(data);
+	for (int i = 0; i < SEN_NUM; i++) {
+		fileSensor << data[3 * i] << ',';
+		fileSensor << data[3 * i + 1] << ',';
+		fileSensor << data[3 * i + 2] << ',';
+	}
+
+	Sensor.GetEuler(data);
+	for (int i = 0; i < SEN_NUM; i++) {
+		fileSensor << data[3 * i] << ',';
+		fileSensor << data[3 * i + 1] << ',';
+		fileSensor << data[3 * i + 2] << ',';
+	}
+	fileSensor << endl;
 }

@@ -8,7 +8,9 @@
 #include <ctime>
 #include <thread>
 #include "taskDAQ.h"
+#include "MatchDevice.h"
 
+#include <GL/freeglut.h>
 
 // COnsetLowerlimbDlg 대화 상자
 class COnsetLowerlimbDlg : public CDialogEx
@@ -41,15 +43,28 @@ public:
 	void LogPrintf(CString input);
 	void LogPrintf(const char* fmt, ...);
 	void TimePrintf();
+	void DisplayGraph();
 
 private:
 	taskDAQ Task;
 	UINT_PTR htimer;
+
 public:
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg void OnDestroy();
 	afx_msg void OnBnClickedTrigger();
 	afx_msg void OnBnClickedReady();
+	CStatic m_graph;
+	CStatic m_monitor;
+
+private:
+	HGLRC m_hRC;
+	CDC* m_pDC;
+
+public:
+	BOOL GetRenderingContext();
+	BOOL GetOldStyleRenderingContext();
+
 };
 
 #endif

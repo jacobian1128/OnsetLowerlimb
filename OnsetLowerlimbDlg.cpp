@@ -59,6 +59,8 @@ COnsetLowerlimbDlg::COnsetLowerlimbDlg(CWnd* pParent /*=nullptr*/)
 void COnsetLowerlimbDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
+	DDX_Control(pDX, IDC_GRAPH, m_graph);
+	DDX_Control(pDX, IDC_MONITOR, m_monitor);
 }
 
 BEGIN_MESSAGE_MAP(COnsetLowerlimbDlg, CDialogEx)
@@ -105,7 +107,11 @@ BOOL COnsetLowerlimbDlg::OnInitDialog()
 
 	// TODO: 여기에 추가 초기화 작업을 추가합니다.
 	Task.resetTime();
-	SetTimer(htimer, 100, NULL);
+	SetTimer(htimer, 10, NULL);
+
+	if (!GetRenderingContext()) {
+		return -1;
+	}
 
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
 }
@@ -191,7 +197,8 @@ void COnsetLowerlimbDlg::LogPrintf(const char* fmt, ...)
 void COnsetLowerlimbDlg::TimePrintf()
 {
 	char time[100];
-	sprintf_s(time, "time: %8.3f [s]", Task.getTime());
+	sprintf_s(time, "time: %8.3f [s]\r\nDegree: %+8.3f [deg]", 
+		Task.getTime(), Task.getPosition());
 
 	CString str(time);
 	SetDlgItemText(IDC_TIME, str);
@@ -203,7 +210,6 @@ void COnsetLowerlimbDlg::OnTimer(UINT_PTR nIDEvent)
 {
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
 	TimePrintf();
-	//LogPrintf("Deg: %.2f [deg]", Task.getDegree());
 }
 
 
@@ -227,4 +233,104 @@ void COnsetLowerlimbDlg::OnBnClickedReady()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	Task.setReady();
+}
+
+
+BOOL COnsetLowerlimbDlg::GetRenderingContext()
+{
+	//픽처 컨트롤에만 그리도록 DC 생성
+	//참고 https://goo.gl/CK36zE
+	CWnd* pImage = GetDlgItem(IDC_GRAPH);
+	CRect rc;
+	pImage->GetWindowRect(rc);
+	m_pDC = pImage->GetDC();
+
+
+	if (NULL == m_pDC)
+	{
+		AfxMessageBox(CString("Unable to get a DC"));
+		return FALSE;
+	}
+
+
+	if (!GetOldStyleRenderingContext())
+	{
+		return TRUE;
+	}
+
+
+
+	return TRUE;
+}
+
+BOOL COnsetLowerlimbDlg::GetOldStyleRenderingContext()
+{
+	//A generic pixel format descriptor. This will be replaced with a more
+	//specific and modern one later, so don't worry about it too much.
+	static PIXELFORMATDESCRIPTOR pfd =
+	{
+		sizeof(PIXELFORMATDESCRIPTOR),
+		1,
+		PFD_DRAW_TO_WINDOW |            // support window
+		PFD_SUPPORT_OPENGL |            // support OpenGL
+		PFD_DOUBLEBUFFER,               // double buffered
+		PFD_TYPE_RGBA,                  // RGBA type
+		32,                             // 32-bit color depth
+		0, 0, 0, 0, 0, 0,               // color bits ignored
+		0,                              // no alpha buffer
+		0,                              // shift bit ignored
+		0,                              // no accumulation buffer
+		0, 0, 0, 0,                     // accum bits ignored
+		24,                        // 24-bit z-buffer
+		0,                              // no stencil buffer
+		0,                              // no auxiliary buffer
+		PFD_MAIN_PLANE,                 // main layer
+		0,                              // reserved
+		0, 0, 0                         // layer masks ignored
+	};
+
+	// Get the id number for the best match supported by the hardware device context
+	// to what is described in pfd
+	int pixelFormat = ChoosePixelFormat(m_pDC->GetSafeHdc(), &pfd);
+
+	//If there's no match, report an error
+	if (0 == pixelFormat)
+	{
+		AfxMessageBox(CString("ChoosePixelFormat failed"));
+		return FALSE;
+	}
+
+	//If there is an acceptable match, set it as the current 
+	if (FALSE == SetPixelFormat(m_pDC->GetSafeHdc(), pixelFormat, &pfd))
+	{
+		AfxMessageBox(CString("SetPixelFormat failed"));
+		return FALSE;
+	}
+
+	//Create a context with this pixel format
+	if (0 == (m_hRC = wglCreateContext(m_pDC->GetSafeHdc())))
+	{
+		AfxMessageBox(CString("wglCreateContext failed"));
+		return FALSE;
+	}
+
+	//Make it current. 
+	if (FALSE == wglMakeCurrent(m_pDC->GetSafeHdc(), m_hRC))
+	{
+		AfxMessageBox(CString("wglMakeCurrent failed"));
+		return FALSE;
+	}
+	return TRUE;
+}
+
+void COnsetLowerlimbDlg::DisplayGraph() {
+
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT);
+	glLoadIdentity();
+
+	glEnd();
+
+	//화면 업데이트
+	SwapBuffers(m_pDC->GetSafeHdc());
 }

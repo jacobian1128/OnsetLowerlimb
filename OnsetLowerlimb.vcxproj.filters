@@ -36,6 +36,12 @@
     <ClInclude Include="taskDAQ.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="MatchDevice.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="LuMatchFdn.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="OnsetLowerlimb.cpp">
@@ -48,6 +54,9 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="taskDAQ.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="MatchDevice.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>

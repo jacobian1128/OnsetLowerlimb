@@ -2,18 +2,21 @@
 #define _TASK_DAQ_H_
 
 #pragma once
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <queue>
+
 #include <NIDAQmx.h>
 
-//class COnsetLowerlimbDlg;
+#include "MatchDevice.h"
+
+using namespace std;
 
 class taskDAQ {
 public:
-	//taskDAQ(COnsetLowerlimbDlg& dlg);
 	taskDAQ();
 	~taskDAQ();
-
-private:
-	//const COnsetLowerlimbDlg& _dlg;
 
 public:
 	void resetTime();
@@ -21,8 +24,16 @@ public:
 
 private:
 	static UINT threadClock(LPVOID pParam);
+	static UINT threadSensor(LPVOID pParam);
+	static UINT threadDAQ(LPVOID pParam);
+
 	CWinThread* pThreadClock;
+	CWinThread* pThreadSensor;
+	CWinThread* pThreadDAQ;
+
 	HANDLE hThreadClock;
+	HANDLE hThreadSensor;
+	HANDLE hThreadDAQ;
 
 	clock_t timeStart;
 	clock_t timeCurrent;
@@ -38,11 +49,12 @@ public:
 public:
 	void setReady();
 	void setTrigger() { bTrigger = true; }
-	void setExecute() { bExecute = true; DAQmxStartTask(taskHandle); }
+	void setExecute() { bExecute = true; }
 	void dismissExecute() { bExecute = false; }
 
 public:
-	float64 getDegree() { return deg; }
+	float64 getPosition() { return position; }
+	float64 getVelocity() { return velocity; }
 
 private:
 	TaskHandle taskHandle;
@@ -52,7 +64,20 @@ private:
 	void readDAQ();
 	void writeDAQ();
 
-	float64 deg;
+	float64 position;
+	float64 velocity;
+
+	fstream fileDAQ;
+	fstream fileSensor;
+
+private:
+	MATCH Sensor;
+	void writeSensorData();
+
+	int stackSize;
+
+	vector<float> stackEMG[SEN_NUM];
+	vector<float64> stackPosition;
 };
 
 #endif
