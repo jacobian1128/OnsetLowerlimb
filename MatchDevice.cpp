@@ -1,6 +1,9 @@
+#pragma once
+
+#include "pch.h"
+#include "taskDAQ.h"
 #include <stdio.h>
 #include <conio.h>
-#include "pch.h"
 #include "LuMatchFdn.h"
 #include "MatchDevice.h"
 
@@ -17,6 +20,7 @@ int   aOpt1Type[SEN_NUM];	/*!< option-space1 type data\n e.g. aOpt1Type[0] repre
 int   aOpt2Type[SEN_NUM];	/*!< option-space2 type data\n e.g. aOpt2Type[0] represents the option-space2 type*/
 int   aBattery[SEN_NUM];	/*!< battery infomation data\n e.g. aBattery[0] represents the battery data of the first MATCH sensor.*/
 int senIdx = 0;
+
 
 void CalibEmgOffset();
 void ChangeOpt1Type(int type);
@@ -37,18 +41,18 @@ int MATCH::InitMATCH()
 	int rtn = 0;
 	int devNum = 0;
 
-	printf("*Scanning for connected MATCH ... ");
+	//printf("*Scanning for connected MATCH ... ");
 	devNum = LufScanSensor();
-	printf("done\n");
+	//printf("done\n");
 
 	if (devNum)
 	{
-		printf("Found %d MATCH\n\n", devNum);
+		//printf("Found %d MATCH\n\n", devNum);
 
-		printf("*Initialization of connected MATCH ... ");
+		//printf("*Initialization of connected MATCH ... ");
 		rtn = LufInitDev(DEVICE_ID, SEN_NUM, SAMPLE_PERIOD_MS, BUF_SIZE, FLT_WIN_SIZE);
-		printf("done\n");
-
+		//printf("done\n");
+		/*
 		if (!rtn)
 		{
 			printf("Sampling Time [ms]: %d\n", SAMPLE_PERIOD_MS);
@@ -59,28 +63,28 @@ int MATCH::InitMATCH()
 		{
 			printf("Can not Initialize LuFoundation API\nError: %d", rtn);
 			return -1;
-		}
-	}
+		}*/
+	}/*
 	else
 	{
 		printf("Check the device connection\nDevice Num : %d\n", devNum);
 		return -1;
 	}
-
+	*/
 	return 0;
 }
 
 int MATCH::GetDataAddress()
 {
-	printf("*Get Sensor Data Address ... ");
+	//printf("*Get Sensor Data Address ... ");
 
 	pVid = (wchar_t *)LufGetVendorString(DEVICE_ID);
 	pPid = (wchar_t *)LufGetProductString(DEVICE_ID);
 
-	printf("done\n");
-	printf("Vender: %S\n", pVid);
-	printf("Product: %S\n", pPid);
-	printf("\n");
+	//printf("done\n");
+	//printf("Vender: %S\n", pVid);
+	//printf("Product: %S\n", pPid);
+	//printf("\n");
 
 	return 0;
 }
@@ -88,15 +92,15 @@ int MATCH::GetDataAddress()
 int MATCH::OpenMATCH()
 {
 	int rtn = LufOpenDev(DEVICE_ID, SEN_NUM, SAMPLE_PERIOD_MS, BUF_SIZE, FLT_WIN_SIZE);
-	if (rtn)
-		printf("Can not connect the device\nError code : %d", rtn);
+	//if (rtn)
+		//printf("Can not connect the device\nError code : %d", rtn);
 	return rtn;
 }
 
-void MATCH::ReadSensorData()
+void MATCH::SensorData()
 {
-	//while (1)
-	//{
+	while (1)
+	{
 	LufGetAllEmgAmpGain(DEVICE_ID, aEmgAmpGain, sizeof(aEmgAmpGain));
 	LufGetAllEmg_V(DEVICE_ID, aEmg, sizeof(aEmg));
 	LufGetAllEuler_deg(DEVICE_ID, aEuler, sizeof(aEuler));
@@ -106,7 +110,7 @@ void MATCH::ReadSensorData()
 	LufGetAllOpt1Type(DEVICE_ID, aOpt1Type, sizeof(aOpt1Type));
 	LufGetAllOpt2Type(DEVICE_ID, aOpt2Type, sizeof(aOpt2Type));
 	LufGetAllBattery_pc(DEVICE_ID, aBattery, sizeof(aBattery));
-	//}
+	}
 }
 
 void MATCH::CloseMATCH()
@@ -137,6 +141,7 @@ void MATCH::GetEuler(float* data)
 {
 	memcpy(data, aEuler, SEN_NUM * 3 * sizeof(float));
 }
+
 
 void CalibEmgOffset()
 {

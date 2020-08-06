@@ -6,10 +6,16 @@
 #include <fstream>
 #include <vector>
 #include <queue>
-
 #include <NIDAQmx.h>
-
 #include "MatchDevice.h"
+#include <time.h>
+
+#include "Eigen/Dense"
+
+using namespace Eigen;
+
+#define stackSize (30000)
+#define TRIAL_NUM	(10)	
 
 using namespace std;
 
@@ -17,6 +23,8 @@ class taskDAQ {
 public:
 	taskDAQ();
 	~taskDAQ();
+
+	void makeRandom();
 
 public:
 	void resetTime();
@@ -35,6 +43,7 @@ private:
 	HANDLE hThreadSensor;
 	HANDLE hThreadDAQ;
 
+public:
 	clock_t timeStart;
 	clock_t timeCurrent;
 
@@ -61,6 +70,7 @@ private:
 
 	void initializeDAQ();
 	void dismissDAQ();
+	void checkDAQ(int i, float checkvalue);
 	void readDAQ();
 	void writeDAQ();
 
@@ -70,14 +80,31 @@ private:
 	fstream fileDAQ;
 	fstream fileSensor;
 
-private:
+public:
 	MATCH Sensor;
 	void writeSensorData();
+	void readSensorData();
+	float64 data[stackSize];
 
-	int stackSize;
+	vector<float64> dataStack[1];
+	vector<int> checkStack[SEN_NUM];
+
+	int countReady = 0; // ready 버튼 누른 횟수 체크
+	char daqfilename[30]; // daq.csv 저장할 파일명
+	char sensorfilename[30]; //sensor.csv 저장할 파일명
 
 	vector<float> stackEMG[SEN_NUM];
-	vector<float64> stackPosition;
+
+	vector<float> stackEMGR[SEN_NUM];
+	vector<float> stackEMGO[SEN_NUM];
+	vector<float> stackEMGF[SEN_NUM];
+
+	//float sEMG 신호 8채널 어레이;
+
+public:
+	int random[50];
+	clock_t timecheck;
+
 };
 
 #endif

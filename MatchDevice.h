@@ -4,7 +4,7 @@
 #pragma once
 
 #define DEVICE_ID			(0)		/*!< Set device(MATCH Cradle) ID. Default value is 0.*/
-#define SEN_NUM				(8)		/*!< Total sensor number. Default value is 8.*/
+#define SEN_NUM				(4)		/*!< Total sensor number. Default value is 8.*/
 #define SAMPLE_PERIOD_MS	(1)		/*!< Data sampling time from MATCH.\n minimum value is 1.\n Unit: milisencond.*/
 #define SAMPLE_FREQ			(1000.0f / SAMPLE_PERIOD_MS) /*!< Data sampling frequency.\n Unit: Hz*/
 #define BUF_SIZE			(100)	/*!< Sensor data buffer for use in the LuFoundation Library.*/
@@ -24,6 +24,8 @@ extern int   aOpt2Type[SEN_NUM];	/*!< option-space2 type data\n e.g. aOpt2Type[0
 extern int   aBattery[SEN_NUM];		/*!< battery infomation data\n e.g. aBattery[0] represents the battery data of the first MATCH sensor.*/
 extern int senIdx;
 
+using namespace std;
+
 class MATCH {
 public:
 	MATCH();
@@ -33,7 +35,7 @@ public:
 	int InitMATCH();
 	int GetDataAddress();
 	int OpenMATCH();
-	void ReadSensorData();
+	void SensorData();
 	void CloseMATCH();
 	// int KeyCommand();
 
@@ -42,6 +44,6 @@ public:
 	void GetAcc(float* data);
 	void GetGyro(float* data);
 	void GetEuler(float* data);
+	
 };
-
 #endif

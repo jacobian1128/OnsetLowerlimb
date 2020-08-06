@@ -13,11 +13,12 @@
 #pragma once
 #include <Windows.h>
 
+
 #ifdef LUMATCH_EXPORTS
 #define LUMATCH_API __declspec(dllexport)
 #else
 #ifdef NDEBUG
-#pragma comment(lib, "LuMatchFdn.lib")
+#pragma comment(lib, "LuMatchFdn.lib")			
 #else
 #pragma comment(lib, "LuMatchFdn_d.lib")
 #endif
@@ -33,6 +34,7 @@ enum LuFdnErr
 	eErrCantMakeThread = -4,
 	eErrCmdSendFail = -5,
 	eErrParamFault = -6
+
 };
 
 /*! Option Data Type */
@@ -99,13 +101,14 @@ extern "C" {
 	// Sensor Param Setting
 	LUMATCH_API int LufSetFactoryParamLoad(const int devIdx, const int senIdx);			//!< Loads factory setting.
 	LUMATCH_API int LufSetSlaveID(const int devIdx, const int senIdx, const int newId);	//!< Sets the MATCH sensor ID.
-
+	
 	// Sensor Calibration
 	LUMATCH_API int LufSetEmgAvgMaxCnt(const int devIdx, const int cnt);		//!< Sets the maximum number required to average sEMG signals of MATCH sensors.
 	LUMATCH_API int LufSetEmgFilterWinSz(const int devIdx, const int winSize);	//!< Sets the filter window size for sEMG signals.
 	LUMATCH_API int LufSetCalibEmgOffset(const int devIdx);						//!< Offset the raw sEMG signal bais to zero.
 	LUMATCH_API int LufSetCalibInertiaBias(const int devIdx, const int senIdx);	//!< Offset the accelerometer and gyroscope bias.
-	LUMATCH_API int LufSetMagnetCalibStart(const int devIdx, const int senIdx);	//!< Starts the a magnetometer calibration of a MATCH sensor.
+	LUMATCH_API int LufSetMagnetCalibStart(const int devIdx, const int senIdx);	//!< Starts the a magnetometer calibration of a MATCH 
+
 	LUMATCH_API int LufSetMagnetCalibStop(const int devIdx, const int senIdx);	//!< Stops the a magnetometer calibration of a MATCH sensor.
 
 	// Sensor Control : Unified Command
@@ -240,7 +243,7 @@ extern "C" {
 	LUMATCH_API float* const LufGetAddrGyroBuf_dps(const int devIdx, const int senIdx);		//!< Returns a pointer to the gyroscope buffer array.
 	LUMATCH_API float* const LufGetAddrMagnetBuf_uT(const int devIdx, const int senIdx);	//!< Returns a pointer to the magnetometer buffer array.
 	LUMATCH_API float* const LufGetAddrEulerBuf_deg(const int devIdx, const int senIdx);	//!< Returns a pointer to the euler angles buffer array.
-
+	
 #ifdef __cplusplus
 }
 #endif

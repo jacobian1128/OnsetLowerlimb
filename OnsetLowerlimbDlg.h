@@ -12,6 +12,7 @@
 
 #include <GL/freeglut.h>
 
+
 // COnsetLowerlimbDlg 대화 상자
 class COnsetLowerlimbDlg : public CDialogEx
 {
@@ -43,7 +44,11 @@ public:
 	void LogPrintf(CString input);
 	void LogPrintf(const char* fmt, ...);
 	void TimePrintf();
+	void TrialPrintf();
 	void DisplayGraph();
+
+	void DisplayGraph_monitor();
+
 
 private:
 	taskDAQ Task;
@@ -61,10 +66,16 @@ private:
 	HGLRC m_hRC;
 	CDC* m_pDC;
 
+private:
+	HGLRC m_hRC_monitor;
+	CDC* m_pDC_monitor;
+
 public:
 	BOOL GetRenderingContext();
+	//BOOL GetRenderingContext_M();
 	BOOL GetOldStyleRenderingContext();
-
+	//BOOL GetOldStyleRenderingContext_M();
+	afx_msg void OnStnClickedTrial();
 };
 
 #endif
